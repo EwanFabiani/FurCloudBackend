@@ -1,4 +1,4 @@
-package eu.furcloud_hosting.controllers.database;
+package eu.furcloud_hosting.api.services.database;
 
 import eu.furcloud_hosting.database.DatabaseManager;
 import eu.furcloud_hosting.exceptions.DatabaseException;

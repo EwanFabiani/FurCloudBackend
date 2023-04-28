@@ -1,9 +1,5 @@
-package eu.furcloud_hosting.services;
+package eu.furcloud_hosting.api.services;
 
 public class AccountService {
-
-    public void createAccount(String username, String email) {
-        
-    }
 
 }
