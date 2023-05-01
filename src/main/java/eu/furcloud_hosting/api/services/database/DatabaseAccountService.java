@@ -55,4 +55,31 @@ public class DatabaseAccountService extends DatabaseService {
         }
     }
 
+    public String getAccountFromEmail(String email) throws DatabaseException {
+        String query = "SELECT accountid FROM accounts WHERE email = ?";
+        try (ResultSet rs = databaseManager.executeQuery(query, email)) {
+            if (rs.next()) {
+                return rs.getString("accountid");
+            }else {
+                throw new DatabaseException("No account with email");
+            }
+        } catch (SQLException e) {
+            throw new DatabaseException("Failed to get account from email");
+        }
+    }
+
+    public String getAccountFromUsername(String username) throws DatabaseException {
+        String query = "SELECT accountid FROM accounts WHERE username = ?";
+        try (ResultSet rs = databaseManager.executeQuery(query, username)) {
+            if (rs.next()) {
+                return rs.getString("accountid");
+            }else {
+                throw new DatabaseException("No account with username");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            throw new DatabaseException("Failed to get accountId from username");
+        }
+    }
+
 }

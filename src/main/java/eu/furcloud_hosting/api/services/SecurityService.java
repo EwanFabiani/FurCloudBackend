@@ -1,13 +1,16 @@
-package eu.furcloud_hosting.security;
+package eu.furcloud_hosting.api.services;
 
+import eu.furcloud_hosting.api.services.database.DatabasePasswordService;
+import eu.furcloud_hosting.exceptions.LoginException;
 import eu.furcloud_hosting.exceptions.PasswordHashingException;
 import org.apache.commons.codec.binary.Hex;
+import org.springframework.http.HttpStatus;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 
-public class SecurityGenerator {
+public class SecurityService {
 
     private static final int SALT_LENGTH = 16;
 
@@ -29,4 +32,14 @@ public class SecurityGenerator {
         }
     }
 
+    public boolean verifyCredentials(String accountid, String password) throws LoginException {
+        try {
+            DatabasePasswordService databasePasswordService = new DatabasePasswordService();
+            byte[] salt = Hex.decodeHex(databasePasswordService.getSalt(accountid));
+            String hashedPassword = databasePasswordService.getHashedPassword(accountid);
+            return hashedPassword.equals(hashPassword(password, salt));
+        } catch (Exception e) {
+            throw new LoginException("Failed to verify credentials", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 }
