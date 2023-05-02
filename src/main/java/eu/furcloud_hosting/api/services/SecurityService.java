@@ -14,14 +14,14 @@ public class SecurityService {
 
     private static final int SALT_LENGTH = 16;
 
-    public byte[] generateSalt() {
+    public static byte[] generateSalt() {
         SecureRandom random = new SecureRandom();
         byte[] salt = new byte[SALT_LENGTH];
         random.nextBytes(salt);
         return salt;
     }
 
-    public String hashPassword(String password, byte[] salt) throws PasswordHashingException {
+    public static String hashPassword(String password, byte[] salt) throws PasswordHashingException {
         try {
             MessageDigest md = MessageDigest.getInstance("SHA-256");
             md.update(salt);
@@ -32,11 +32,11 @@ public class SecurityService {
         }
     }
 
-    public boolean verifyCredentials(String accountid, String password) throws LoginException {
+    public static boolean verifyCredentials(String accountId, String password) throws LoginException {
         try {
             DatabasePasswordService databasePasswordService = new DatabasePasswordService();
-            byte[] salt = Hex.decodeHex(databasePasswordService.getSalt(accountid));
-            String hashedPassword = databasePasswordService.getHashedPassword(accountid);
+            byte[] salt = Hex.decodeHex(databasePasswordService.getSalt(accountId));
+            String hashedPassword = databasePasswordService.getHashedPassword(accountId);
             return hashedPassword.equals(hashPassword(password, salt));
         } catch (Exception e) {
             throw new LoginException("Failed to verify credentials", HttpStatus.INTERNAL_SERVER_ERROR);

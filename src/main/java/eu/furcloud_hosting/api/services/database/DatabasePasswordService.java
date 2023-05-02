@@ -15,9 +15,8 @@ public class DatabasePasswordService extends DatabaseService {
 
     public void saveCredentials(String accountId, String password) throws DatabaseException, PasswordHashingException {
         try {
-            SecurityService securityService = new SecurityService();
-            byte[] salt = securityService.generateSalt();
-            String hashedPassword = securityService.hashPassword(password, salt);
+            byte[] salt = SecurityService.generateSalt();
+            String hashedPassword = SecurityService.hashPassword(password, salt);
             String query = "INSERT INTO credentials (accountid, password, salt) VALUES (?, ?, ?)";
             databaseManager.executeUpdate(query, accountId, hashedPassword, Hex.encodeHexString(salt));
         } catch (SQLException e) {

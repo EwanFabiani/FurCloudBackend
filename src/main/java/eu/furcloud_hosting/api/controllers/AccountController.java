@@ -3,6 +3,7 @@ package eu.furcloud_hosting.api.controllers;
 import eu.furcloud_hosting.api.models.AccountCreationModel;
 import eu.furcloud_hosting.api.models.LoginModel;
 import eu.furcloud_hosting.api.services.*;
+import eu.furcloud_hosting.api.models.ResponseStatus;
 import eu.furcloud_hosting.api.services.database.DataSyncService;
 import eu.furcloud_hosting.api.services.database.DatabaseAccountService;
 import eu.furcloud_hosting.api.services.database.DatabasePasswordService;
@@ -13,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.sql.SQLException;
+import java.util.HashMap;
 
 @RestController
 @RequestMapping(value = "/account", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -81,18 +83,13 @@ public class AccountController {
         String identifier = loginModel.getIdentifier();
         String password = loginModel.getPassword();
         try {
-            if (DataSyncService.isNull(identifier, password)) {
-                throw new LoginException("Missing required fields", HttpStatus.BAD_REQUEST);
-            }
-
-            AccountService accountService = new AccountService();
-            String accountId = accountService.getAccountFromIdentifier(identifier);
-            SecurityService securityService = new SecurityService();
-
-            if (!securityService.verifyCredentials(accountId, password)) {
-                throw new LoginException("Invalid credentials", HttpStatus.UNAUTHORIZED);
-            }
-            String response = JSONService.createJsonSuccess("Login successful");
+            LoginService loginService = new LoginService();
+            String accountId = loginService.authenticateUser(identifier, password);
+            SessionService sessionService = new SessionService();
+            String sessionId = sessionService.createSession(accountId);
+            HashMap<String, String> responseMap = new HashMap<>();
+            responseMap.put("sessionId", sessionId);
+            String response = JSONService.createJSON(ResponseStatus.SUCCESS, responseMap);
             return ResponseEntity.status(HttpStatus.OK).body(response);
         } catch (LoginException e) {
             String error = JSONService.createJsonError(e.getMessage());

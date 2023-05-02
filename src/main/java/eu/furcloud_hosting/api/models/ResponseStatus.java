@@ -1,8 +1,8 @@
-package eu.furcloud_hosting.api.services;
+package eu.furcloud_hosting.api.models;
 
 import com.google.gson.annotations.SerializedName;
 
-public enum Status {
+public enum ResponseStatus {
 
     @SerializedName("success")
     SUCCESS,

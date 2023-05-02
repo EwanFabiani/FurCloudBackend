@@ -1,6 +1,7 @@
 package eu.furcloud_hosting.api.services.database;
 
 import eu.furcloud_hosting.api.services.IDService;
+import eu.furcloud_hosting.exceptions.AccountNotFoundException;
 import eu.furcloud_hosting.exceptions.DatabaseException;
 import org.apache.commons.dbutils.DbUtils;
 
@@ -13,37 +14,13 @@ public class DatabaseAccountService extends DatabaseService {
 
     public String createAccount(String username, String email) throws DatabaseException {
         try {
-            String UUID = new IDService().generateID();
+            String UUID = IDService.generateID();
             String query = "INSERT INTO accounts (accountid, username, email) VALUES (?, ?, ?)";
             databaseManager.executeUpdate(query, UUID, username, email);
             return UUID;
         } catch (SQLException e) {
             throw new DatabaseException("Failed to create account");
         }
-    }
-
-    public boolean doesAccountExistUsername(String username) throws DatabaseException {
-        String query = "SELECT * FROM accounts WHERE username = ?";
-        try (ResultSet rs = databaseManager.executeQuery(query, username)) {
-            if (rs.next()) {
-                return true;
-            }
-        } catch (SQLException e) {
-            throw new DatabaseException("Failed to check if account exists");
-        }
-        return false;
-    }
-
-    public boolean doesAccountExistEmail(String email) throws DatabaseException {
-        String query = "SELECT * FROM accounts WHERE email = ?";
-        try (ResultSet rs = databaseManager.executeQuery(query, email)) {
-            if (rs.next()) {
-                return true;
-            }
-        } catch (SQLException e) {
-            throw new DatabaseException("Failed to check if account exists");
-        }
-        return false;
     }
 
     public void verifyAccount(String accountId) throws DatabaseException {
@@ -79,6 +56,19 @@ public class DatabaseAccountService extends DatabaseService {
         } catch (SQLException e) {
             e.printStackTrace();
             throw new DatabaseException("Failed to get accountId from username");
+        }
+    }
+
+    public String getAccountFromIdentifier(String identifier) throws AccountNotFoundException, DatabaseException {
+        String query = "SELECT accountid FROM accounts WHERE username = ? OR email = ?";
+        try (ResultSet rs = databaseManager.executeQuery(query, identifier, identifier)) {
+            if (rs.next()) {
+                return rs.getString("accountid");
+            }else {
+                throw new AccountNotFoundException("No account with username or email");
+            }
+        } catch (SQLException e) {
+            throw new DatabaseException("Failed to get accountId from identifier");
         }
     }
 
