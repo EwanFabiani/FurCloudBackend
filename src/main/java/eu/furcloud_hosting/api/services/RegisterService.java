@@ -2,17 +2,27 @@ package eu.furcloud_hosting.api.services;
 
 import eu.furcloud_hosting.api.services.database.DataSyncService;
 import eu.furcloud_hosting.api.services.database.DatabaseAccountService;
+import eu.furcloud_hosting.api.services.database.DatabasePasswordService;
 import eu.furcloud_hosting.exceptions.DatabaseException;
+import eu.furcloud_hosting.exceptions.PasswordHashingException;
 import eu.furcloud_hosting.exceptions.RegisterException;
 import org.springframework.http.HttpStatus;
 
+import java.sql.SQLException;
+
 public class RegisterService {
 
-    public String createAccount(String username, String email, String password) throws RegisterException {
+    public void createAccount(String username, String email, String password) throws RegisterException {
         try {
             doArgumentsMeetRequirements(username, email, password);
-        } catch (DatabaseException e) {
-            throw new RegisterException("Failed to authenticate user", HttpStatus.INTERNAL_SERVER_ERROR);
+            DatabaseAccountService databaseAccountService = new DatabaseAccountService();
+            DatabasePasswordService databasePasswordService = new DatabasePasswordService();
+            DataSyncService.beginTransactions(databaseAccountService, databasePasswordService);
+            String accountId = databaseAccountService.createAccount(username, email);
+            databasePasswordService.saveCredentials(accountId, password);
+            DataSyncService.commitTransactions(databaseAccountService, databasePasswordService);
+        } catch (DatabaseException | SQLException | PasswordHashingException e) {
+            throw new RegisterException("Failed to create user", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 

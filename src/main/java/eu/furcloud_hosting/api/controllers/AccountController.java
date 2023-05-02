@@ -2,18 +2,17 @@ package eu.furcloud_hosting.api.controllers;
 
 import eu.furcloud_hosting.api.models.AccountCreationModel;
 import eu.furcloud_hosting.api.models.LoginModel;
-import eu.furcloud_hosting.api.services.*;
 import eu.furcloud_hosting.api.models.ResponseStatus;
-import eu.furcloud_hosting.api.services.database.DataSyncService;
-import eu.furcloud_hosting.api.services.database.DatabaseAccountService;
-import eu.furcloud_hosting.api.services.database.DatabasePasswordService;
-import eu.furcloud_hosting.exceptions.*;
+import eu.furcloud_hosting.api.services.*;
+import eu.furcloud_hosting.exceptions.DatabaseException;
+import eu.furcloud_hosting.exceptions.InvalidVerificationCodeException;
+import eu.furcloud_hosting.exceptions.LoginException;
+import eu.furcloud_hosting.exceptions.RegisterException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.sql.SQLException;
 import java.util.HashMap;
 
 @RestController
@@ -26,36 +25,10 @@ public class AccountController {
         String email = accountCreationModel.getEmail();
         String password = accountCreationModel.getPassword();
         try {
-            if (DataSyncService.isNull(username, email, password)) {
-                throw new RegisterException("Missing required fields", HttpStatus.BAD_REQUEST);
-            }
-            try {
-                DatabaseAccountService databaseAccountService = new DatabaseAccountService();
-                DatabasePasswordService databasePasswordService = new DatabasePasswordService();
-                DataSyncService.beginTransactions(databaseAccountService, databasePasswordService);
-
-                if (databaseAccountService.doesAccountExistEmail(email)) {
-                    throw new RegisterException("Email already in use by another account", HttpStatus.CONFLICT);
-                }
-                if (databaseAccountService.doesAccountExistUsername(username)) {
-                    throw new RegisterException("Username already taken", HttpStatus.CONFLICT);
-                }
-                String accountId = databaseAccountService.createAccount(username, email);
-
-                databasePasswordService.saveCredentials(accountId, password);
-
-                VerificationService verificationService = new VerificationService();
-                String verificationCode = verificationService.createVerificationCode(accountId);
-                verificationService.sendVerificationEmail(email, accountId, verificationCode);
-
-                DataSyncService.commitTransactions(databaseAccountService, databasePasswordService);
-
-                String response = JSONService.createJsonSuccess("Account created successfully");
-                return ResponseEntity.status(HttpStatus.CREATED).body(response);
-            } catch (DatabaseException | SQLException | PasswordHashingException e) {
-                String error = JSONService.createJsonError("Failed to create account");
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
-            }
+            RegisterService registerService = new RegisterService();
+            registerService.createAccount(username, email, password);
+            String response = JSONService.createJsonSuccess("Account created successfully");
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
         }catch (RegisterException e) {
             String error = JSONService.createJsonError(e.getMessage());
             return ResponseEntity.status(e.getStatusCode()).body(error);

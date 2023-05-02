@@ -13,6 +13,7 @@ public abstract class DatabaseService {
         try {
             databaseManager = new DatabaseManager();
         } catch (SQLException e) {
+            e.printStackTrace();
             throw new DatabaseException("Failed to connect to database");
         }
     }

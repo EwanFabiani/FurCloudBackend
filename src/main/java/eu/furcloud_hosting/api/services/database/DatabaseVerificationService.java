@@ -12,7 +12,7 @@ public class DatabaseVerificationService extends DatabaseService{
 
     public void saveVerificationCode(String accountId, String code) throws DatabaseException {
         try {
-            String query = "INSERT INTO verification (accountid, code) VALUES (?, ?)";
+            String query = "INSERT INTO verification (account_id, code) VALUES (?, ?)";
             databaseManager.executeUpdate(query, accountId, code);
         } catch (SQLException e) {
             throw new DatabaseException("Failed to save verification code");
@@ -23,7 +23,7 @@ public class DatabaseVerificationService extends DatabaseService{
         String query = "SELECT * FROM verification WHERE code = ?";
         try (ResultSet rs = databaseManager.executeQuery(query, code);) {
             if (rs.next()) {
-                return rs.getString("accountid");
+                return rs.getString("account_id");
             }else {
                 throw new InvalidVerificationCodeException();
             }

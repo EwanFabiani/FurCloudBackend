@@ -6,9 +6,9 @@ import org.apache.commons.dbutils.DbUtils;
 
 public class DatabaseManager {
 
-    private static final String DB_URL = "jdbc:mariadb://localhost:3306/furcloud";
+    private static final String DB_URL = "jdbc:mariadb://172.17.0.2:3306/furcloud";
     private static final String user = "root";
-    private static final String password = "";
+    private static final String password = "374rR2847375d6Wb6B5r6Gs9p1VFqd881ssFNYcL8634asrFfS1rUAUN39R178ra";
 
     private boolean transactionActive = false;
 
@@ -26,6 +26,7 @@ public class DatabaseManager {
             }
             return ps.executeQuery();
         }catch (SQLException e) {
+            e.printStackTrace();
             throw new SQLException(e);
         }
     }
@@ -37,6 +38,7 @@ public class DatabaseManager {
             }
             return ps.executeUpdate();
         }catch (SQLException e) {
+            e.printStackTrace();
             throw new SQLException(e);
         }
     }

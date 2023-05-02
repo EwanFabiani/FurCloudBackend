@@ -17,7 +17,7 @@ public class DatabasePasswordService extends DatabaseService {
         try {
             byte[] salt = SecurityService.generateSalt();
             String hashedPassword = SecurityService.hashPassword(password, salt);
-            String query = "INSERT INTO credentials (accountid, password, salt) VALUES (?, ?, ?)";
+            String query = "INSERT INTO credentials (account_id, password, salt) VALUES (?, ?, ?)";
             databaseManager.executeUpdate(query, accountId, hashedPassword, Hex.encodeHexString(salt));
         } catch (SQLException e) {
             throw new DatabaseException("Failed to save password");
@@ -25,7 +25,7 @@ public class DatabasePasswordService extends DatabaseService {
     }
 
     public String getSalt(String accountId) throws DatabaseException {
-        String query = "SELECT salt FROM credentials WHERE accountid = ?";
+        String query = "SELECT salt FROM credentials WHERE account_id = ?";
         try (ResultSet rs = databaseManager.executeQuery(query, accountId)) {
             if (rs.next()) {
                 return rs.getString("salt");
@@ -38,7 +38,7 @@ public class DatabasePasswordService extends DatabaseService {
     }
 
     public String getHashedPassword(String accountId) throws DatabaseException {
-        String query = "SELECT password FROM credentials WHERE accountid = ?";
+        String query = "SELECT password FROM credentials WHERE account_id = ?";
         try (ResultSet rs = databaseManager.executeQuery(query, accountId)) {
             if (rs.next()) {
                 return rs.getString("password");
