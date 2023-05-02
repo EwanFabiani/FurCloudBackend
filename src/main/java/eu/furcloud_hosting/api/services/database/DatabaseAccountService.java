@@ -3,7 +3,6 @@ package eu.furcloud_hosting.api.services.database;
 import eu.furcloud_hosting.api.services.IDService;
 import eu.furcloud_hosting.exceptions.AccountNotFoundException;
 import eu.furcloud_hosting.exceptions.DatabaseException;
-import org.apache.commons.dbutils.DbUtils;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -71,5 +70,7 @@ public class DatabaseAccountService extends DatabaseService {
             throw new DatabaseException("Failed to get accountId from identifier");
         }
     }
+
+    public boolean
 
 }
