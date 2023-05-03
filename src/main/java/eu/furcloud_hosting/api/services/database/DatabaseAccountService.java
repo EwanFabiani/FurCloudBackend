@@ -1,5 +1,7 @@
 package eu.furcloud_hosting.api.services.database;
 
+import eu.furcloud_hosting.api.models.Account;
+import eu.furcloud_hosting.api.models.AccountStatus;
 import eu.furcloud_hosting.api.services.IDService;
 import eu.furcloud_hosting.exceptions.AccountNotFoundException;
 import eu.furcloud_hosting.exceptions.DatabaseException;
@@ -31,7 +33,7 @@ public class DatabaseAccountService extends DatabaseService {
         }
     }
 
-    public String getAccountFromEmail(String email) throws DatabaseException {
+    public String getAccountIdFromEmail(String email) throws DatabaseException {
         String query = "SELECT account_id FROM accounts WHERE email = ?";
         try (ResultSet rs = databaseManager.executeQuery(query, email)) {
             if (rs.next()) {
@@ -44,7 +46,7 @@ public class DatabaseAccountService extends DatabaseService {
         }
     }
 
-    public String getAccountFromUsername(String username) throws DatabaseException {
+    public String getAccountIdFromUsername(String username) throws DatabaseException {
         String query = "SELECT account_id FROM accounts WHERE username = ?";
         try (ResultSet rs = databaseManager.executeQuery(query, username)) {
             if (rs.next()) {
@@ -58,7 +60,7 @@ public class DatabaseAccountService extends DatabaseService {
         }
     }
 
-    public String getAccountFromIdentifier(String identifier) throws AccountNotFoundException, DatabaseException {
+    public String getAccountIdFromIdentifier(String identifier) throws AccountNotFoundException, DatabaseException {
         String query = "SELECT account_id FROM accounts WHERE username = ? OR email = ?";
         try (ResultSet rs = databaseManager.executeQuery(query, identifier, identifier)) {
             if (rs.next()) {
@@ -68,6 +70,38 @@ public class DatabaseAccountService extends DatabaseService {
             }
         } catch (SQLException e) {
             throw new DatabaseException("Failed to get accountId from identifier");
+        }
+    }
+
+    public AccountStatus getAccountStatus(String accountId) throws DatabaseException {
+        String query = "SELECT status FROM accounts WHERE account_id = ?";
+        try (ResultSet rs = databaseManager.executeQuery(query, accountId)) {
+            if (rs.next()) {
+                return AccountStatus.valueOf(rs.getString("status"));
+            }else {
+                throw new DatabaseException("No account with accountId");
+            }
+        } catch (SQLException e) {
+            throw new DatabaseException("Failed to get account from accountId");
+        }
+    }
+
+    public Account getAccountFromId(String accountId) throws DatabaseException {
+        String query = "SELECT * FROM accounts WHERE account_id = ?";
+        try (ResultSet rs = databaseManager.executeQuery(query, accountId)) {
+            if (rs.next()) {
+                return new Account(
+                    rs.getString("account_id"),
+                    rs.getString("username"),
+                    rs.getString("email"),
+                    AccountStatus.valueOf(rs.getString("status")),
+                    rs.getBoolean("admin")
+                );
+            }else {
+                throw new DatabaseException("No account with accountId");
+            }
+        } catch (SQLException e) {
+            throw new DatabaseException("Failed to get account from accountId");
         }
     }
 

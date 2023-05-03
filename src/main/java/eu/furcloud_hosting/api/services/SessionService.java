@@ -1,8 +1,11 @@
 package eu.furcloud_hosting.api.services;
 
+import eu.furcloud_hosting.api.models.Account;
+import eu.furcloud_hosting.api.services.database.DatabaseAccountService;
 import eu.furcloud_hosting.api.services.database.DatabaseSessionService;
 import eu.furcloud_hosting.exceptions.DatabaseException;
 import eu.furcloud_hosting.exceptions.LoginException;
+import eu.furcloud_hosting.exceptions.SessionException;
 import org.springframework.http.HttpStatus;
 
 public class SessionService {
@@ -15,6 +18,17 @@ public class SessionService {
             return sessionId;
         } catch (DatabaseException e) {
             throw new LoginException("Failed to create session", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    public Account validateSession(String sessionId) throws SessionException {
+        try {
+            DatabaseSessionService databaseSessionService = new DatabaseSessionService();
+            String accountId = databaseSessionService.getAccountIdFromSessionId(sessionId);
+            DatabaseAccountService databaseAccountService = new DatabaseAccountService();
+            return databaseAccountService.getAccountFromId(accountId);
+        } catch (DatabaseException e) {
+            throw new SessionException("Failed to validate session", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 

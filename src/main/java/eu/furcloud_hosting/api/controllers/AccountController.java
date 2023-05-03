@@ -1,19 +1,22 @@
 package eu.furcloud_hosting.api.controllers;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.reflect.TypeToken;
+import eu.furcloud_hosting.api.models.Account;
 import eu.furcloud_hosting.api.models.AccountCreationModel;
 import eu.furcloud_hosting.api.models.LoginModel;
 import eu.furcloud_hosting.api.models.ResponseStatus;
 import eu.furcloud_hosting.api.services.*;
-import eu.furcloud_hosting.exceptions.DatabaseException;
-import eu.furcloud_hosting.exceptions.InvalidVerificationCodeException;
-import eu.furcloud_hosting.exceptions.LoginException;
-import eu.furcloud_hosting.exceptions.RegisterException;
+import eu.furcloud_hosting.exceptions.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.lang.reflect.Type;
 import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping(value = "/account", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -65,6 +68,23 @@ public class AccountController {
             String response = JSONService.createJSON(ResponseStatus.SUCCESS, responseMap);
             return ResponseEntity.status(HttpStatus.OK).body(response);
         } catch (LoginException e) {
+            String error = JSONService.createJsonError(e.getMessage());
+            return ResponseEntity.status(e.getStatusCode()).body(error);
+        }
+    }
+
+    @GetMapping("/session/{sessionId}")
+    public ResponseEntity<String> getAccount(@PathVariable String sessionId) {
+        try {
+            SessionService sessionService = new SessionService();
+            Account account = sessionService.validateSession(sessionId);
+            Gson gson = new Gson();
+            Type type = new TypeToken<Map<String, String>>(){}.getType();
+            String accountJson = gson.toJson(account);
+            HashMap<String, String> responseMap = gson.fromJson(accountJson, type);
+            String response = JSONService.createJSON(ResponseStatus.SUCCESS, responseMap);
+            return ResponseEntity.status(HttpStatus.OK).body(response);
+        } catch (SessionException e) {
             String error = JSONService.createJsonError(e.getMessage());
             return ResponseEntity.status(e.getStatusCode()).body(error);
         }

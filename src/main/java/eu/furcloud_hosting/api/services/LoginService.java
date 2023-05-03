@@ -1,5 +1,6 @@
 package eu.furcloud_hosting.api.services;
 
+import eu.furcloud_hosting.api.models.AccountStatus;
 import eu.furcloud_hosting.api.services.database.DataSyncService;
 import eu.furcloud_hosting.api.services.database.DatabaseAccountService;
 import eu.furcloud_hosting.exceptions.AccountNotFoundException;
@@ -15,16 +16,32 @@ public class LoginService {
         }
         try {
             DatabaseAccountService databaseAccountService = new DatabaseAccountService();
-            String accountId = databaseAccountService.getAccountFromIdentifier(identifier);
+            String accountId = databaseAccountService.getAccountIdFromIdentifier(identifier);
             if (!SecurityService.verifyCredentials(accountId, password)) {
                 throw new LoginException("The credentials you provided are invalid.", HttpStatus.UNAUTHORIZED);
             }
+            throwTextStatusExceptions(databaseAccountService, accountId);
             return accountId;
         } catch (DatabaseException e) {
-            e.printStackTrace();
             throw new LoginException("There was an error while attempting to authenticate your account.", HttpStatus.INTERNAL_SERVER_ERROR);
         } catch (AccountNotFoundException e) {
             throw new LoginException("Invalid username or email.", HttpStatus.NOT_FOUND);
+        }
+    }
+
+    public void throwTextStatusExceptions(DatabaseAccountService databaseAccountService, String accountId) throws LoginException, DatabaseException {
+        AccountStatus accountStatus = databaseAccountService.getAccountStatus(accountId);
+        if (accountStatus == AccountStatus.BANNED) {
+            throw new LoginException("Your account has been banned.", HttpStatus.UNAUTHORIZED);
+        }
+        if (accountStatus == AccountStatus.UNVERIFIED) {
+            throw new LoginException("Your account has not been verified yet.", HttpStatus.UNAUTHORIZED);
+        }
+        if (accountStatus == AccountStatus.DELETED) {
+            throw new LoginException("This account has been deleted.", HttpStatus.UNAUTHORIZED);
+        }
+        if (accountStatus == AccountStatus.SUSPENDED) {
+            throw new LoginException("Your account has been suspended and is currently under review.", HttpStatus.UNAUTHORIZED);
         }
     }
 
