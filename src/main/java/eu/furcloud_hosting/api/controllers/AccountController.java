@@ -1,7 +1,6 @@
 package eu.furcloud_hosting.api.controllers;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import eu.furcloud_hosting.api.models.Account;
 import eu.furcloud_hosting.api.models.AccountCreationModel;
