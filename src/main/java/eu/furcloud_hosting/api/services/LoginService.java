@@ -1,6 +1,6 @@
 package eu.furcloud_hosting.api.services;
 
-import eu.furcloud_hosting.api.models.AccountStatus;
+import eu.furcloud_hosting.api.data.AccountStatus;
 import eu.furcloud_hosting.api.services.database.DataSyncService;
 import eu.furcloud_hosting.api.services.database.DatabaseAccountService;
 import eu.furcloud_hosting.exceptions.AccountNotFoundException;

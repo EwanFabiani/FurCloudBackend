@@ -1,10 +1,12 @@
 package eu.furcloud_hosting.api.services.database;
 
-import eu.furcloud_hosting.api.models.Account;
-import eu.furcloud_hosting.api.models.AccountStatus;
+import eu.furcloud_hosting.api.data.Account;
+import eu.furcloud_hosting.api.data.AccountStatus;
 import eu.furcloud_hosting.api.services.IDService;
 import eu.furcloud_hosting.exceptions.AccountNotFoundException;
 import eu.furcloud_hosting.exceptions.DatabaseException;
+import eu.furcloud_hosting.exceptions.RegisterException;
+import org.springframework.http.HttpStatus;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -95,7 +97,8 @@ public class DatabaseAccountService extends DatabaseService {
                     rs.getString("username"),
                     rs.getString("email"),
                     AccountStatus.valueOf(rs.getString("status")),
-                    rs.getBoolean("admin")
+                    rs.getBoolean("admin"),
+                    rs.getTimestamp("created_at")
                 );
             }else {
                 throw new DatabaseException("No account with accountId");
@@ -104,5 +107,22 @@ public class DatabaseAccountService extends DatabaseService {
             throw new DatabaseException("Failed to get account from accountId");
         }
     }
+
+    public void doesAccountAlreadyExist(String username, String email) throws RegisterException {
+        String query = "SELECT * FROM accounts WHERE username = ? OR email = ?";
+        try (ResultSet rs = databaseManager.executeQuery(query, username, email)) {
+            if (rs.next()) {
+                if (rs.getString("email").equals(email)) {
+                    throw new RegisterException("Email is already taken!", HttpStatus.CONFLICT);
+                } else {
+                    throw new RegisterException("Username is already taken!", HttpStatus.CONFLICT);
+                }
+            }
+        } catch (SQLException e) {
+            throw new RegisterException("Failed to check if account already exists", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    //public void canAccountUsernameBeChanged(String accountId)
 
 }

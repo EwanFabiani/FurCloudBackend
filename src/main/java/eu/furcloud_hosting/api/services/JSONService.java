@@ -10,7 +10,7 @@ import java.util.HashMap;
 
 public class JSONService {
 
-    public static String createJSON(ResponseStatus status, HashMap<String, String> message) {
+    public static String createJsonData(ResponseStatus status, HashMap<String, String> message) {
         DataResponse dataResponse = new DataResponse(status, message);
         Gson gson = new Gson();
         return gson.toJson(dataResponse);

@@ -1,8 +1,6 @@
 package eu.furcloud_hosting.api.controllers;
 
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-import eu.furcloud_hosting.api.models.Account;
+import eu.furcloud_hosting.api.data.Account;
 import eu.furcloud_hosting.api.models.AccountCreationModel;
 import eu.furcloud_hosting.api.models.LoginModel;
 import eu.furcloud_hosting.api.models.ResponseStatus;
@@ -13,9 +11,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.lang.reflect.Type;
 import java.util.HashMap;
-import java.util.Map;
 
 @RestController
 @RequestMapping(value = "/account", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -64,7 +60,7 @@ public class AccountController {
             String sessionId = sessionService.createSession(accountId);
             HashMap<String, String> responseMap = new HashMap<>();
             responseMap.put("sessionId", sessionId);
-            String response = JSONService.createJSON(ResponseStatus.SUCCESS, responseMap);
+            String response = JSONService.createJsonData(ResponseStatus.SUCCESS, responseMap);
             return ResponseEntity.status(HttpStatus.OK).body(response);
         } catch (LoginException e) {
             String error = JSONService.createJsonError(e.getMessage());
@@ -77,15 +73,32 @@ public class AccountController {
         try {
             SessionService sessionService = new SessionService();
             Account account = sessionService.validateSession(sessionId);
-            Gson gson = new Gson();
-            Type type = new TypeToken<Map<String, String>>(){}.getType();
-            String accountJson = gson.toJson(account);
-            HashMap<String, String> responseMap = gson.fromJson(accountJson, type);
-            String response = JSONService.createJSON(ResponseStatus.SUCCESS, responseMap);
+            String response = JSONService.createJsonData(ResponseStatus.SUCCESS, account.toHashMap());
             return ResponseEntity.status(HttpStatus.OK).body(response);
         } catch (SessionException e) {
             String error = JSONService.createJsonError(e.getMessage());
             return ResponseEntity.status(e.getStatusCode()).body(error);
         }
     }
+
+    @PostMapping("/logout/{sessionId}")
+    public ResponseEntity<String> logout(@PathVariable String sessionId) {
+        try {
+            SessionService sessionService = new SessionService();
+            sessionService.deleteSession(sessionId);
+            String response = JSONService.createJsonSuccess("Logged out successfully");
+            return ResponseEntity.status(HttpStatus.OK).body(response);
+        } catch (SessionException e) {
+            String error = JSONService.createJsonError(e.getMessage());
+            return ResponseEntity.status(e.getStatusCode()).body(error);
+        }
+    }
+    /*
+    @PostMapping("/modify/username")
+    public ResponseEntity<String> modifyUsername(@RequestBody DataRequestModel dataRequestModel) {
+        SessionService sessionService = new SessionService();
+        Account account = sessionService.validateSession(dataRequestModel.getSessionId());
+        return null;
+    }
+    */
 }

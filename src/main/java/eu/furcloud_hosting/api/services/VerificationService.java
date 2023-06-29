@@ -33,6 +33,7 @@ public class VerificationService {
         String verificationCode = generateVerificationCode();
         try {
             saveVerificationCode(accountId, verificationCode);
+            //TODO: Send verification email
         } catch (DatabaseException e) {
             throw new DatabaseException("Failed to create Verification Code");
         }

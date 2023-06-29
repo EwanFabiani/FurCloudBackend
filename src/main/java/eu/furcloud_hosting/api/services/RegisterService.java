@@ -14,6 +14,7 @@ public class RegisterService {
 
     public void createAccount(String username, String email, String password) throws RegisterException {
         try {
+            doesAccountAlreadyExist(username, email);
             doArgumentsMeetRequirements(username, email, password);
             DatabaseAccountService databaseAccountService = new DatabaseAccountService();
             DatabasePasswordService databasePasswordService = new DatabasePasswordService();
@@ -41,4 +42,12 @@ public class RegisterService {
         }
     }
 
+    public void doesAccountAlreadyExist(String username, String email) throws RegisterException {
+        try {
+            DatabaseAccountService databaseAccountService = new DatabaseAccountService();
+            databaseAccountService.doesAccountAlreadyExist(username, email);
+        }catch (DatabaseException e) {
+            throw new RegisterException("Failed to create user", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 }

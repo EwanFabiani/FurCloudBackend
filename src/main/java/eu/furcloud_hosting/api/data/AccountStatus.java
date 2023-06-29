@@ -1,4 +1,4 @@
-package eu.furcloud_hosting.api.models;
+package eu.furcloud_hosting.api.data;
 
 public enum AccountStatus {
 
