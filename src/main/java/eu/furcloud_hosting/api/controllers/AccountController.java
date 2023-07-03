@@ -2,6 +2,7 @@ package eu.furcloud_hosting.api.controllers;
 
 import eu.furcloud_hosting.api.data.Account;
 import eu.furcloud_hosting.api.models.AccountCreationModel;
+import eu.furcloud_hosting.api.models.DataRequestModel;
 import eu.furcloud_hosting.api.models.LoginModel;
 import eu.furcloud_hosting.api.models.ResponseStatus;
 import eu.furcloud_hosting.api.services.*;
@@ -93,12 +94,16 @@ public class AccountController {
             return ResponseEntity.status(e.getStatusCode()).body(error);
         }
     }
-    /*
+
     @PostMapping("/modify/username")
     public ResponseEntity<String> modifyUsername(@RequestBody DataRequestModel dataRequestModel) {
         SessionService sessionService = new SessionService();
-        Account account = sessionService.validateSession(dataRequestModel.getSessionId());
+        try {
+            Account account = sessionService.validateSession(dataRequestModel.getSessionId());
+        } catch (SessionException e) {
+            e.printStackTrace();
+        }
         return null;
     }
-    */
+
 }
