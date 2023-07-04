@@ -35,4 +35,8 @@ public class Account {
         return map;
     }
 
+    public String getAccountId() {
+        return accountId;
+    }
+
 }

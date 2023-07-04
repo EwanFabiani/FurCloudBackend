@@ -53,4 +53,13 @@ public class DatabaseSessionService extends DatabaseService {
             throw new DatabaseException("Failed to delete session");
         }
     }
+
+    public void deleteAllSessions(String accountId) throws DatabaseException {
+        String query = "DELETE FROM sessions WHERE account_id = ?";
+        try {
+            databaseManager.executeUpdate(query, accountId);
+        } catch (SQLException e) {
+            throw new DatabaseException("Failed to delete sessions");
+        }
+    }
 }

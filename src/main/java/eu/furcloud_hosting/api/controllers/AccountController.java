@@ -6,6 +6,7 @@ import eu.furcloud_hosting.api.models.DataRequestModel;
 import eu.furcloud_hosting.api.models.LoginModel;
 import eu.furcloud_hosting.api.models.ResponseStatus;
 import eu.furcloud_hosting.api.services.*;
+import eu.furcloud_hosting.api.services.database.DatabaseAccountService;
 import eu.furcloud_hosting.exceptions.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -95,6 +96,22 @@ public class AccountController {
         }
     }
 
+    @PostMapping("/delete_sessions/{sessionId}")
+    public ResponseEntity<String> deleteSessions(@PathVariable String sessionId) {
+        try {
+            SessionService sessionService = new SessionService();
+            Account account = sessionService.validateSession(sessionId);
+            String accountId = account.getAccountId();
+            sessionService.deleteAllSessions(accountId);
+            String response = JSONService.createJsonSuccess("Deleted all logged in sessions successfully");
+            return ResponseEntity.status(HttpStatus.OK).body(response);
+        } catch (SessionException e) {
+            String error = JSONService.createJsonError(e.getMessage());
+            return ResponseEntity.status(e.getStatusCode()).body(error);
+        }
+    }
+
+    //TODO: THIS IS UNFINISHED
     @PostMapping("/modify/username")
     public ResponseEntity<String> modifyUsername(@RequestBody DataRequestModel dataRequestModel) {
         SessionService sessionService = new SessionService();

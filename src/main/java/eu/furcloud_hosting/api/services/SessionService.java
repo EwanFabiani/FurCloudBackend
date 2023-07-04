@@ -46,4 +46,14 @@ public class SessionService {
         }
     }
 
+    public void deleteAllSessions(String accountId) throws SessionException {
+        try {
+            DatabaseSessionService databaseSessionService = new DatabaseSessionService();
+            databaseSessionService.deleteAllSessions(accountId);
+        } catch (DatabaseException e) {
+            throw new SessionException("Failed to delete sessions", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+
 }
