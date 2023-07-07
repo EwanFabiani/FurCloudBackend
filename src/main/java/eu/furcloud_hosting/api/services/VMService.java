@@ -45,7 +45,7 @@ public class VMService {
     public void startVM(String sessionId, String vmId) throws DatabaseException, IllegalArgumentException {
         try {
             DatabaseSessionService databaseSessionService = new DatabaseSessionService();
-            String accountId = databaseSessionService.getAccountIdFromSessionId(sessionId);
+            String accountId = databaseSessionService.validateSessionAndGetId(sessionId);
             if (!doesUserOwnServer(accountId, vmId)) {
                 throw new IllegalArgumentException("You do not own this server!");
             }
@@ -59,7 +59,7 @@ public class VMService {
     public void stopVM(String sessionId, String vmId) throws DatabaseException, IllegalArgumentException {
         try {
             DatabaseSessionService databaseSessionService = new DatabaseSessionService();
-            String accountId = databaseSessionService.getAccountIdFromSessionId(sessionId);
+            String accountId = databaseSessionService.validateSessionAndGetId(sessionId);
             if (!doesUserOwnServer(accountId, vmId)) {
                 throw new IllegalArgumentException("You do not own this server!");
             }
@@ -73,7 +73,7 @@ public class VMService {
     public void restartVM(String sessionId, String vmId) throws DatabaseException, IllegalArgumentException {
         try {
             DatabaseSessionService databaseSessionService = new DatabaseSessionService();
-            String accountId = databaseSessionService.getAccountIdFromSessionId(sessionId);
+            String accountId = databaseSessionService.validateSessionAndGetId(sessionId);
             if (!doesUserOwnServer(accountId, vmId)) {
                 throw new IllegalArgumentException("You do not own this server!");
             }

@@ -19,13 +19,31 @@ public class DatabaseSessionService extends DatabaseService {
         }
     }
 
-    public String getAccountIdFromSessionId(String sessionId) throws DatabaseException, IllegalArgumentException {
+    public String validateSessionAndGetId(String sessionId) throws DatabaseException, IllegalArgumentException {
+        try {
+            if (sessionExists(sessionId)) {
+                if (isSessionValid(sessionId)) {
+                    return getSessionAccountId(sessionId);
+                } else {
+                    deleteSession(sessionId);
+                    throw new IllegalArgumentException("Session is not valid");
+                }
+            }else {
+                throw new IllegalArgumentException("Session does not exist");
+            }
+        }catch (DatabaseException e) {
+            throw new DatabaseException("Failed to validate session");
+        }
+
+    }
+
+    private String getSessionAccountId(String sessionId) throws DatabaseException, IllegalArgumentException {
         String query = "SELECT account_id FROM sessions WHERE session_id = ?";
         try (ResultSet rs = databaseManager.executeQuery(query, sessionId)) {
             if (rs.next()) {
                 return rs.getString("account_id");
             } else {
-                throw new IllegalArgumentException("No account with session id");
+                throw new IllegalArgumentException("Invalid session id");
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -33,7 +51,7 @@ public class DatabaseSessionService extends DatabaseService {
         }
     }
 
-    public boolean sessionExists(String sessionId) throws DatabaseException {
+    private boolean sessionExists(String sessionId) throws DatabaseException {
         String query = "SELECT * FROM sessions WHERE session_id = ?";
         try (ResultSet rs = databaseManager.executeQuery(query, sessionId)) {
             return rs.next();
@@ -60,6 +78,21 @@ public class DatabaseSessionService extends DatabaseService {
             databaseManager.executeUpdate(query, accountId);
         } catch (SQLException e) {
             throw new DatabaseException("Failed to delete sessions");
+        }
+    }
+
+    private boolean isSessionValid(String sessionId) throws DatabaseException, IllegalArgumentException {
+        String query = "SELECT created_at FROM sessions WHERE session_id = ?";
+        try {
+            try (ResultSet rs = databaseManager.executeQuery(query, sessionId)) {
+                if (rs.next()) {
+                    return rs.getTimestamp("created_at").toLocalDateTime().plusDays(30).isAfter(java.time.LocalDateTime.now());
+                } else {
+                    throw new IllegalArgumentException("Session does not exist");
+                }
+            }
+        } catch (SQLException e) {
+            throw new DatabaseException("Failed to check if session is valid");
         }
     }
 }

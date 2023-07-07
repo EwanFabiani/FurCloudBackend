@@ -24,7 +24,7 @@ public class SessionService {
     public Account validateSession(String sessionId) throws SessionException {
         try {
             DatabaseSessionService databaseSessionService = new DatabaseSessionService();
-            String accountId = databaseSessionService.getAccountIdFromSessionId(sessionId);
+            String accountId = databaseSessionService.validateSessionAndGetId(sessionId);
             DatabaseAccountService databaseAccountService = new DatabaseAccountService();
             return databaseAccountService.getAccountFromId(accountId);
         } catch (DatabaseException e) {
